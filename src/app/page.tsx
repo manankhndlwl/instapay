@@ -1,15 +1,24 @@
-"use client";
+'use client'
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import Loading from "@/components/ui/loading";
 import { useAppDispatch } from "@/lib/redux/store";
-import { addPaymentMethod,setTotal } from "@/lib/redux/paymentSlice";
+import { addPaymentMethod, setTotal } from "@/lib/redux/paymentSlice";
 import { calculateTotalPrice } from "@/lib/CalculateTotal";
 import Link from "next/link";
 
+// Define Product interface
+interface Product {
+  id: number;
+  title: string;
+  price: number;
+  image: string;
+  quantity: number;
+}
+
 export default function Home() {
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<Product[]>([]); // Provide type annotation for products
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -17,8 +26,6 @@ export default function Home() {
   }, []);
 
   const dispatch = useAppDispatch();
-
-  let data;
 
   const fetchOrderDetails = async () => {
     try {
@@ -28,9 +35,9 @@ export default function Home() {
       if (!response.ok) {
         throw new Error("Failed to fetch data");
       }
-      data = await response.json();
+      const data = await response.json();
       setProducts(data?.products);
-      const total:number = calculateTotalPrice(data?.products);
+      const total: number = calculateTotalPrice(data?.products);
       dispatch(addPaymentMethod(data?.paymentMethods));
       dispatch(setTotal(total));
       setLoading(false);
@@ -60,26 +67,18 @@ export default function Home() {
                   <div>
                     {products.map((product) => {
                       return (
-                        <>
-                          <div className="flex flex-col rounded-lg bg-white sm:flex-row">
-                            <img
-                              className="m-2 h-24 w-28 rounded-md border object-cover object-center"
-                              src={product?.image}
-                              alt=""
-                            />
-                            <div className="flex w-full flex-col px-4 py-4">
-                              <span className="font-semibold">
-                                {product?.title}
-                              </span>
-                              <span className="float-right text-gray-400">
-                                Quantity : {product?.quantity}
-                              </span>
-                              <p className="text-lg font-bold">
-                                ${product?.price}
-                              </p>
-                            </div>
+                        <div key={product.id} className="flex flex-col rounded-lg bg-white sm:flex-row">
+                          <img
+                            className="m-2 h-24 w-28 rounded-md border object-cover object-center"
+                            src={product.image}
+                            alt=""
+                          />
+                          <div className="flex w-full flex-col px-4 py-4">
+                            <span className="font-semibold">{product.title}</span>
+                            <span className="float-right text-gray-400">Quantity : {product.quantity}</span>
+                            <p className="text-lg font-bold">${product.price}</p>
                           </div>
-                        </>
+                        </div>
                       );
                     })}
                     <p className="mb-2 font-bold text-black">
